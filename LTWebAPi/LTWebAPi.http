@@ -1,0 +1,6 @@
+@LTWebAPi_HostAddress = http://localhost:5170
+
+GET {{LTWebAPi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
