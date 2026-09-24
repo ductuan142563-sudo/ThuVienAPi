@@ -2,7 +2,7 @@
 using LTWebAPi.Models.Domain;
 using LTWebAPi.Models.DTO;
 using Microsoft.EntityFrameworkCore;
-namespace WebAPI_simple.Repositories
+namespace LTWebAPi.Repositories
 {
     public class SQLBookRepository : IBookRepository
     {
@@ -29,7 +29,7 @@ namespace WebAPI_simple.Repositories
             }).ToList();
             return allBooks;
         }
-        Public BookWithAuthorAndPublisherDTO GetBookById(int id)
+        public BookWithAuthorAndPublisherDTO GetBookById(int id)
         {
             var bookWithDomain = _dbContext.Books.Where(n => n.Id == id);
             //Map Domain Model to DTOs 
@@ -62,7 +62,7 @@ namespace WebAPI_simple.Repositories
                 Genre = addBookRequestDTO.Genre,
                 CoverUrl = addBookRequestDTO.CoverUrl,
                 DateAdded = addBookRequestDTO.DateAdded,
-                PublisherID = addBookRequestDTO.PublisherID
+                PublisherId = addBookRequestDTO.PublisherID
             };
             //Use Domain Model to add Book 
             _dbContext.Books.Add(bookDomainModel);
@@ -94,7 +94,7 @@ namespace WebAPI_simple.Repositories
                 bookDomain.Genre = bookDTO.Genre;
                 bookDomain.CoverUrl = bookDTO.CoverUrl;
                 bookDomain.DateAdded = bookDTO.DateAdded;
-                bookDomain.PublisherID = bookDTO.PublisherID;
+                bookDomain.PublisherId = bookDTO.PublisherID;
                 _dbContext.SaveChanges();
             }
 

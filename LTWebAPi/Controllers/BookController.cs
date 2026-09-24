@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
-using WebAPI_simple.Repositories;
+using LTWebAPi.Repositories;
 
 namespace WebAPI_simple.Controllers
 {
@@ -37,7 +37,7 @@ namespace WebAPI_simple.Controllers
             var bookWithIdDTO = _bookRepository.GetBookById(id);
             return Ok(bookWithIdDTO);
         }
-        [HttpPost(“add - book”)]
+        [HttpPost("add - book")]
         public IActionResult AddBook([FromBody] AddBookRequestDTO addBookRequestDTO)
         {
             var bookAdd = _bookRepository.AddBook(addBookRequestDTO);

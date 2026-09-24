@@ -1,6 +1,6 @@
 ﻿using LTWebAPi.Models.Domain;
 using LTWebAPi.Models.DTO;
-namespace WebAPI_simple.Repositories
+namespace LTWebAPi.Repositories
 {
     public interface IBookRepository
     {
