@@ -1,13 +1,10 @@
-﻿using LTWebAPi.Data;
-using LTWebAPi.Models.Domain;
+﻿using LTWebAPi.CustomActionFilters;
+using LTWebAPi.Data;
 using LTWebAPi.Models.DTO;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Net;
 using LTWebAPi.Repositories;
+using Microsoft.AspNetCore.Mvc;
 
-namespace WebAPI_simple.Controllers
+namespace WebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -25,7 +22,6 @@ namespace WebAPI_simple.Controllers
         [HttpGet("get-all-books")]
         public IActionResult GetAll()
         {
-            // su dung reposity pattern  
             var allBooks = _bookRepository.GetAllBooks();
             return Ok(allBooks);
         }
@@ -37,9 +33,16 @@ namespace WebAPI_simple.Controllers
             var bookWithIdDTO = _bookRepository.GetBookById(id);
             return Ok(bookWithIdDTO);
         }
-        [HttpPost("add - book")]
+
+        [HttpPost("add-book")]
+        [ValidateModel]
         public IActionResult AddBook([FromBody] AddBookRequestDTO addBookRequestDTO)
         {
+            if (!ValidateAddBook(addBookRequestDTO))
+            {
+                return BadRequest(ModelState);
+            }
+
             var bookAdd = _bookRepository.AddBook(addBookRequestDTO);
             return Ok(bookAdd);
         }
@@ -57,5 +60,52 @@ namespace WebAPI_simple.Controllers
             var deleteBook = _bookRepository.DeleteBookById(id);
             return Ok(deleteBook);
         }
+
+        #region Private methods
+        private bool ValidateAddBook(AddBookRequestDTO addBookRequestDTO)
+        {
+            if (addBookRequestDTO == null)
+            {
+                ModelState.AddModelError(nameof(addBookRequestDTO), "Please add book data");
+                return false;
+            }
+            var publisherExists = _dbContext.Publishers.Any(p => p.Id == addBookRequestDTO.PublisherID);
+            if (!publisherExists)
+            {
+                ModelState.AddModelError(nameof(addBookRequestDTO.PublisherID),
+                    $"Publisher với ID {addBookRequestDTO.PublisherID} không tồn tại trong hệ thống.");
+            }
+            if (addBookRequestDTO.AuthorIds != null && addBookRequestDTO.AuthorIds.Any())
+            {
+                if (addBookRequestDTO.AuthorIds.Count != addBookRequestDTO.AuthorIds.Distinct().Count())
+                {
+                    ModelState.AddModelError(nameof(addBookRequestDTO.AuthorIds), "Không được phép gán trùng lặp cùng một Tác giả nhiều lần.");
+                }
+                foreach (var authorId in addBookRequestDTO.AuthorIds)
+                {
+                    var authorExists = _dbContext.Authors.Any(a => a.Id == authorId);
+                    if (!authorExists)
+                    {
+                        ModelState.AddModelError(nameof(addBookRequestDTO.AuthorIds), $"Tác giả với ID {authorId} không tồn tại trong hệ thống.");
+                    }
+                }
+            }
+            if (string.IsNullOrEmpty(addBookRequestDTO.Description))
+            {
+                ModelState.AddModelError(nameof(addBookRequestDTO.Description), $"{nameof(addBookRequestDTO.Description)} cannot be null");
+            }
+            if (addBookRequestDTO.Rate < 0 || addBookRequestDTO.Rate > 5)
+            {
+                ModelState.AddModelError(nameof(addBookRequestDTO.Rate), $"{nameof(addBookRequestDTO.Rate)} cannot be less than 0 and more than 5");
+            }
+
+            if (ModelState.ErrorCount > 0)
+            {
+                return false;
+            }
+
+            return true;
+        }
+        #endregion
     }
 }
