@@ -1,7 +1,6 @@
 ﻿using LTWebAPi.CustomActionFilters;
 using LTWebAPi.Data;
 using LTWebAPi.Models.DTO;
-using LTWebAPi.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebApi.Controllers
@@ -20,9 +19,13 @@ namespace WebApi.Controllers
         }
 
         [HttpGet("get-all-books")]
-        public IActionResult GetAll()
+        public IActionResult GetAll([FromQuery] string? filterOn, [FromQuery] string? filterQuery,
+ [FromQuery] string? sortBy, [FromQuery] bool isAscending,
+ [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 3)
         {
-            var allBooks = _bookRepository.GetAllBooks();
+            // su dung reposity pattern
+            var allBooks = _bookRepository.GetAllBooks(filterOn, filterQuery, sortBy,
+           isAscending, pageNumber, pageSize);
             return Ok(allBooks);
         }
 

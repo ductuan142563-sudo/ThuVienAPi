@@ -1,8 +1,14 @@
 using LTWebAPi.Data;
-using Microsoft.EntityFrameworkCore;
 using LTWebAPi.Repositories;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using WebAPI_simple.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true;
+});
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

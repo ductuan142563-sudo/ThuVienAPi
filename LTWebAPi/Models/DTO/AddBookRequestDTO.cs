@@ -19,6 +19,7 @@ namespace LTWebAPi.Models.DTO
         public int? Rate { get; set; }
 
         public string? Genre { get; set; }
+        public DateTime DateAdded { get; set; }
 
         public string? CoverUrl { get; set; }
 
