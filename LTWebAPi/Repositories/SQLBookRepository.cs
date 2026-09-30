@@ -1,25 +1,21 @@
 ﻿using LTWebAPi.Data;
 using LTWebAPi.Models.Domain;
 using LTWebAPi.Models.DTO;
-
-namespace WebAPI_simple.Repositories
+using Microsoft.EntityFrameworkCore;
+namespace WebAPI.Repositories
 {
     public class SQLBookRepository : IBookRepository
     {
         private readonly AppDbContext _dbContext;
-
         public SQLBookRepository(AppDbContext dbContext)
         {
             _dbContext = dbContext;
         }
 
-        public List<BookWithAuthorAndPublisherDTO> GetAllBooks(string? filterOn = null, string?
-filterQuery = null,
- string? sortBy = null, bool isAscending = true, int pageNumber = 1, int
-pageSize = 1000)
+        public List<BookWithAuthorAndPublisherDTO> GetAllBooks(string? filterOn = null, string? filterQuery = null,
+            string? sortBy = null, bool isAscending = true, int pageNumber = 1, int pageSize = 1000)
         {
-            var allBooks = _dbContext.Books.Select(Books => new
-           BookWithAuthorAndPublisherDTO()
+            var allBooks = _dbContext.Books.Select(Books => new BookWithAuthorAndPublisherDTO()
             {
                 Id = Books.Id,
                 Title = Books.Title,
@@ -29,38 +25,42 @@ pageSize = 1000)
                 Rate = Books.IsRead ? Books.Rate.Value : null,
                 Genre = Books.Genre,
                 CoverUrl = Books.CoverUrl,
+                DateAdded = Books.DateAdded,
                 PublisherName = Books.Publisher.Name,
                 AuthorNames = Books.Book_Authors.Select(n => n.Author.FullName).ToList()
             }).AsQueryable();
+
             //filtering
-            if (string.IsNullOrWhiteSpace(filterOn) == false &&
-           string.IsNullOrWhiteSpace(filterQuery) == false)
+            if (string.IsNullOrWhiteSpace(filterOn) == false && string.IsNullOrWhiteSpace(filterQuery) == false)
             {
                 if (filterOn.Equals("title", StringComparison.OrdinalIgnoreCase))
                 {
                     allBooks = allBooks.Where(x => x.Title.Contains(filterQuery));
                 }
             }
+
             //sorting
             if (string.IsNullOrWhiteSpace(sortBy) == false)
             {
                 if (sortBy.Equals("title", StringComparison.OrdinalIgnoreCase))
                 {
-                    allBooks = isAscending ? allBooks.OrderBy(x => x.Title) :
-                   allBooks.OrderByDescending(x => x.Title);
+                    allBooks = isAscending ? allBooks.OrderBy(x => x.Title) : allBooks.OrderByDescending(x => x.Title);
                 }
             }
+
             //pagination
             var skipResults = (pageNumber - 1) * pageSize;
             return allBooks.Skip(skipResults).Take(pageSize).ToList();
         }
 
-
         public BookWithAuthorAndPublisherDTO GetBookById(int id)
         {
-            var bookWithDomain = _dbContext.Books.Where(n => n.Id == id);
+            var bookWithDomain = _dbContext.Books
+                .Include(b => b.Publisher)
+                .Include(b => b.Book_Authors).ThenInclude(ba => ba.Author)
+                .Where(n => n.Id == id);
 
-            // Map Domain Model to DTOs
+            //Map Domain Model to DTOs
             var bookWithIdDTO = bookWithDomain.Select(book => new BookWithAuthorAndPublisherDTO()
             {
                 Id = book.Id,
@@ -71,6 +71,7 @@ pageSize = 1000)
                 Rate = book.Rate,
                 Genre = book.Genre,
                 CoverUrl = book.CoverUrl,
+                DateAdded = book.DateAdded,
                 PublisherName = book.Publisher.Name,
                 AuthorNames = book.Book_Authors.Select(n => n.Author.FullName).ToList()
             }).FirstOrDefault();
@@ -80,7 +81,7 @@ pageSize = 1000)
 
         public AddBookRequestDTO AddBook(AddBookRequestDTO addBookRequestDTO)
         {
-            // Map DTO to Domain Model
+            //map DTO to Domain Model
             var bookDomainModel = new Book
             {
                 Title = addBookRequestDTO.Title,
@@ -94,7 +95,7 @@ pageSize = 1000)
                 PublisherId = addBookRequestDTO.PublisherID
             };
 
-            // Use Domain Model to add Book
+            //Use Domain Model to add Book
             _dbContext.Books.Add(bookDomainModel);
             _dbContext.SaveChanges();
 
@@ -105,7 +106,6 @@ pageSize = 1000)
                     BookId = bookDomainModel.Id,
                     AuthorId = id
                 };
-
                 _dbContext.Books_Authors.Add(_book_author);
                 _dbContext.SaveChanges();
             }
@@ -127,7 +127,6 @@ pageSize = 1000)
                 bookDomain.CoverUrl = bookDTO.CoverUrl;
                 bookDomain.DateAdded = bookDTO.DateAdded;
                 bookDomain.PublisherId = bookDTO.PublisherID;
-
                 _dbContext.SaveChanges();
             }
 
@@ -145,7 +144,6 @@ pageSize = 1000)
                     BookId = id,
                     AuthorId = authorid
                 };
-
                 _dbContext.Books_Authors.Add(_book_author);
                 _dbContext.SaveChanges();
             }
@@ -161,7 +159,6 @@ pageSize = 1000)
                 _dbContext.Books.Remove(bookDomain);
                 _dbContext.SaveChanges();
             }
-
             return bookDomain;
         }
     }
