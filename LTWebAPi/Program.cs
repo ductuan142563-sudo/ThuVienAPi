@@ -2,9 +2,20 @@ using LTWebAPi.Data;
 using LTWebAPi.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using WebAPI.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
+// ===== SERILOG =====
+var logger = new LoggerConfiguration()
+    .WriteTo.Console()                                          
+    .WriteTo.File("Logs/Book_Log.txt", rollingInterval: RollingInterval.Minute)  
+    .MinimumLevel.Information()
+    .CreateLogger();
+
+builder.Logging.ClearProviders();
+builder.Logging.AddSerilog(logger);
+// ===== END SERILOG =====
 
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
