@@ -1,5 +1,6 @@
 ﻿using LTWebAPi.Models.Domain;  
 using Microsoft.EntityFrameworkCore;
+using LTWebAPi.Models.Image;
 
 namespace LTWebAPi.Data
 {
@@ -27,5 +28,6 @@ namespace LTWebAPi.Data
         public DbSet<Author> Authors { get; set; }
         public DbSet<Book_Author> Books_Authors { get; set; }
         public DbSet<Publisher> Publishers { get; set; }
+        public DbSet<Image> Images { get; set; }
     }
 }
