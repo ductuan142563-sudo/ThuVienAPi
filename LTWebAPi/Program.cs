@@ -2,14 +2,16 @@ using LTWebAPi.Data;
 using LTWebAPi.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Serilog;
 using WebAPI.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
+
 // ===== SERILOG =====
 var logger = new LoggerConfiguration()
-    .WriteTo.Console()                                          
-    .WriteTo.File("Logs/Book_Log.txt", rollingInterval: RollingInterval.Minute)  
+    .WriteTo.Console()
+    .WriteTo.File("Logs/Book_Log.txt", rollingInterval: RollingInterval.Minute)
     .MinimumLevel.Information()
     .CreateLogger();
 
@@ -25,6 +27,11 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// ===== Quan trọng cho Upload Image =====
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IImageRepository, LocalImageRepository>();
+// ======================================
 
 // Đăng ký DbContext
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -45,11 +52,20 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "LT Web API v1");
-        c.RoutePrefix = "swagger"; // truy cập: https://localhost:xxxx/swagger
+        c.RoutePrefix = "swagger";
     });
 }
 
 app.UseHttpsRedirection();
+
+// ===== Cho phép truy cập file trong folder Images =====
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), "Images")),
+    RequestPath = "/Images"
+});
+// ======================================================
 
 app.UseAuthorization();
 
