@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="library-web/library-web.csproj" Id="d764f209-7a64-4901-8b13-027498774ae5" />
   <Project Path="LTWebAPi/LTWebAPi.csproj" />
 </Solution>

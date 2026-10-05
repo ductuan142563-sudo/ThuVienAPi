@@ -1,0 +1,81 @@
+﻿@model IEnumerable<library_web.Models.DTO.BookDTO>
+
+@{
+    ViewData["Title"] = "List Books";
+}
+
+<h2>Danh sách Sách</h2>
+
+<form asp-controller="Books" asp-action="Index" method="get" class="mb-3">
+    <div class="row g-2">
+        <div class="col-auto">
+            <select name="filterOn" class="form-select">
+                <option value="">-- Lọc theo --</option>
+                <option value="title">Tiêu đề</option>
+                <option value="author">Tác giả</option>
+                <option value="publisher">Nhà xuất bản</option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <input type="text" name="filterQuery" class="form-control" placeholder="Từ khóa..." />
+        </div>
+        <div class="col-auto">
+            <select name="sortBy" class="form-select">
+                <option value="">-- Sắp xếp --</option>
+                <option value="title">Tiêu đề</option>
+                <option value="rate">Đánh giá</option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Tìm</button>
+        </div>
+    </div>
+</form>
+
+<p>
+    <a asp-action="addBook" class="btn btn-success">Thêm sách mới</a>
+</p>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Tiêu đề</th>
+            <th>Tác giả</th>
+            <th>NXB</th>
+            <th>Đánh giá</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Id</td>
+                <td>@item.Title</td>
+                <td>
+                    @if (item.AuthorNames != null)
+                    {
+                        @string.Join(", ", item.AuthorNames)
+                    }
+                </td>
+                <td>@item.PublisherName</td>
+                <td>
+                    @if (item.Rate.HasValue)
+                    {
+                        for (int i = 0; i < item.Rate; i++)
+                        {
+                            <span>★</span>
+                        }
+                    }
+                </td>
+                <td>
+                    <a asp-action="listBook" asp-route-id="@item.Id">Chi tiết</a> |
+                    <a asp-action="editBook" asp-route-id="@item.Id">Sửa</a> |
+                    <a asp-action="delBook" asp-route-id="@item.Id"
+                       onclick="return confirm('Xóa sách này?')">Xóa</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

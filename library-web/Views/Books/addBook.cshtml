@@ -1,0 +1,99 @@
+﻿@model library_web.Models.DTO.addBookDTO
+
+@{
+    ViewData["Title"] = "Thêm sách";
+    var listAuthor = ViewBag.ListAuthor as List<library_web.Models.DTO.authorDTO>;
+    var listPublisher = ViewBag.ListPublisher as List<library_web.Models.DTO.publisherDTO>;
+}
+
+<h2>Thêm sách mới</h2>
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger">@ViewBag.Error</div>
+}
+
+<form asp-action="addBook" method="post">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label class="form-label">Tiêu đề *</label>
+                <input asp-for="Title" class="form-control" required />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Mô tả</label>
+                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Đã đọc?</label><br />
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" asp-for="IsRead" value="true" id="isReadYes" />
+                    <label class="form-check-label" for="isReadYes">Có</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" asp-for="IsRead" value="false" id="isReadNo" checked />
+                    <label class="form-check-label" for="isReadNo">Chưa</label>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Ngày đọc</label>
+                <input asp-for="DateRead" type="date" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Đánh giá (0-5)</label>
+                <input asp-for="Rate" type="number" min="0" max="5" class="form-control" />
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label class="form-label">Thể loại</label>
+                <input asp-for="Genre" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Cover URL</label>
+                <input asp-for="CoverUrl" class="form-control" placeholder="https://..." />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Ngày thêm</label>
+                <input asp-for="DateAdded" type="date" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Nhà xuất bản *</label>
+                <select asp-for="PublisherID" class="form-select" required>
+                    <option value="">-- Chọn NXB --</option>
+                    @if (listPublisher != null)
+                    {
+                        @foreach (var item in listPublisher)
+                        {
+                            <option value="@item.Id">@item.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Tác giả * (giữ Ctrl để chọn nhiều)</label>
+                <select name="AuthorIds" class="form-select" multiple required size="5">
+                    @if (listAuthor != null)
+                    {
+                        @foreach (var item in listAuthor)
+                        {
+                            <option value="@item.Id">@item.FullName</option>
+                        }
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Lưu sách</button>
+    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
+</form>
